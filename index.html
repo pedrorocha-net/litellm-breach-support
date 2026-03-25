@@ -823,8 +823,10 @@
             <div class="status-badge">Under Investigation</div>
             <h1>LiteLLM Supply Chain Security Review</h1>
             <p class="hero-subtitle">
-                On March 24, 2026, two versions of the LiteLLM Python package were identified as containing unauthorized code. 
-                This advisory provides information about the incident, affected versions, and recommended actions for organizations.
+                <strong>Two malicious versions of LiteLLM (1.82.7 and 1.82.8) were published to PyPI on March 24, 2026.</strong>
+                If you installed or updated LiteLLM during the 3-hour exposure window, the unauthorized code may have accessed your 
+                <strong>SSH keys, cloud credentials, AI API keys, and environment variables</strong>. Even if you don't use LiteLLM directly, 
+                it may have been installed as a dependency of other AI tools you use.
             </p>
             <div class="hero-meta">
                 <div class="hero-meta-item">
