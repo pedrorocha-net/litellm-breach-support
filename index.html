@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>LiteLLM Security Advisory - March 2026 Incident Response Guide</title>
+    <meta name="description" content="Comprehensive security advisory for the LiteLLM supply chain incident on March 24, 2026. Learn if you're affected, what to do, and how to secure your systems.">
+    <meta name="keywords" content="LiteLLM, security advisory, supply chain attack, Python package, PyPI, CVE, incident response, TeamPCP, AI security">
+    <meta name="author" content="Security Advisory Community">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://pedrorocha-net.github.io/litellm-security-advisory/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pedrorocha-net.github.io/litellm-security-advisory/">
+    <meta property="og:title" content="LiteLLM Security Advisory - March 2026 Incident Response Guide">
+    <meta property="og:description" content="Comprehensive security advisory for the LiteLLM supply chain incident. Learn if you're affected and how to respond.">
+    <meta property="og:site_name" content="LiteLLM Security Advisory">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://pedrorocha-net.github.io/litellm-security-advisory/">
+    <meta property="twitter:title" content="LiteLLM Security Advisory - March 2026">
+    <meta property="twitter:description" content="Comprehensive security advisory for the LiteLLM supply chain incident. Learn if you're affected and how to respond.">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    
+    <!-- Preconnect to Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #fafafa;
+            --color-surface: #ffffff;
+            --color-surface-2: #f5f5f5;
+            --color-border: #e5e5e5;
+            --color-text: #171717;
+            --color-text-secondary: #525252;
+            --color-text-muted: #737373;
+            --color-primary: #0ea5e9;
+            --color-primary-dark: #0284c7;
+            --color-accent: #06b6d4;
+            --color-warning: #f59e0b;
+            --color-warning-light: #fffbeb;
+            --color-success: #10b981;
+            --color-danger: #ef4444;
+            --color-danger-light: #fef2f2;
+            --font-main: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --radius: 8px;
+            --radius-lg: 12px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: var(--font-main);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            color: var(--color-text);
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--color-primary);
+        }
+        
+        /* Hero */
+        .hero {
+            background: var(--color-surface);
+            padding: 64px 0 48px;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .hero-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--color-warning-light);
+            color: var(--color-warning);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--color-warning);
+            border-radius: 50%;
+        }
+        
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            color: var(--color-text);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: var(--color-text-secondary);
+            max-width: 700px;
+            margin-bottom: 32px;
+            line-height: 1.7;
+        }
+        
+        .hero-meta {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+            padding-top: 24px;
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .hero-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .hero-meta-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-muted);
+            font-weight: 500;
+        }
+        
+        .hero-meta-value {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        
+        /* Quick Summary Box */
+        .quick-summary {
+            max-width: 1100px;
+            margin: -24px auto 0;
+            padding: 0 24px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .summary-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+        
+        @media (max-width: 768px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .summary-item h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        
+        .version-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            font-family: var(--font-mono);
+        }
+        
+        .tag-danger {
+            background: var(--color-danger-light);
+            color: var(--color-danger);
+        }
+        
+        .tag-success {
+            background: #f0fdf4;
+            color: var(--color-success);
+        }
+        
+        .tag-default {
+            background: var(--color-surface-2);
+            color: var(--color-text-secondary);
+        }
+        
+        /* Main Content */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+        
+        .section {
+            margin-bottom: 64px;
+        }
+        
+        .section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section-header {
+            margin-bottom: 32px;
+        }
+        
+        .section-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+        
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 12px;
+        }
+        
+        .section-intro {
+            color: var(--color-text-secondary);
+            font-size: 1.05rem;
+            max-width: 700px;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+        
+        .card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card p {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+        
+        .card-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .card-grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .card-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        @media (max-width: 900px) {
+            .card-grid-2, .card-grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Info Box */
+        .info-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .info-box-title {
+            font-weight: 600;
+            color: #0369a1;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-box p {
+            color: #0c4a6e;
+            font-size: 0.95rem;
+        }
+        
+        /* Warning Box */
+        .warning-box {
+            background: var(--color-warning-light);
+            border: 1px solid #fcd34d;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .warning-box-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .warning-box p {
+            color: #78350f;
+            font-size: 0.95rem;
+        }
+        
+        /* Action Box */
+        .action-box {
+            background: var(--color-danger-light);
+            border: 1px solid #fecaca;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .action-box-title {
+            font-weight: 600;
+            color: #991b1b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-box p {
+            color: #7f1d1d;
+            font-size: 0.95rem;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 32px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: var(--color-border);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 32px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -28px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            background: var(--color-surface);
+            border: 2px solid var(--color-primary);
+            border-radius: 50%;
+        }
+        
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+        
+        .timeline-date {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            margin-bottom: 4px;
+        }
+        
+        .timeline-item h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .timeline-item p {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        /* Steps */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .step {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        
+        .step-header {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .step-header:hover {
+            background: var(--color-surface-2);
+        }
+        
+        .step-number {
+            width: 44px;
+            height: 44px;
+            background: var(--color-primary);
+            color: white;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        .step-title {
+            flex: 1;
+        }
+        
+        .step-title h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .step-title p {
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .step-toggle {
+            color: var(--color-text-muted);
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+        
+        .step.expanded .step-toggle {
+            transform: rotate(180deg);
+        }
+        
+        .step-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .step.expanded .step-content {
+            max-height: 2000px;
+        }
+        
+        .step-inner {
+            padding: 0 24px 24px 88px;
+        }
+        
+        @media (max-width: 600px) {
+            .step-inner {
+                padding-left: 24px;
+            }
+        }
+        
+        /* Code Block */
+        .code-block {
+            background: #1e1e1e;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+        
+        .code-block code {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #e4e4e7;
+            white-space: pre;
+            display: block;
+            line-height: 1.6;
+        }
+        
+        .code-comment {
+            color: #6b7280;
+        }
+        
+        .code-command {
+            color: #4ade80;
+        }
+        
+        /* Checklist */
+        .checklist {
+            list-style: none;
+        }
+        
+        .checklist li {
+            padding: 12px 0 12px 32px;
+            position: relative;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+        
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist li::before {
+            content: '☐';
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+            font-size: 1.1rem;
+        }
+        
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        
+        @media (max-width: 600px) {
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .resource-link {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            text-decoration: none;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        
+        .resource-link:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow);
+        }
+        
+        .resource-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--color-surface-2);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        
+        .resource-info h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .resource-info p {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+        
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .data-table th {
+            background: var(--color-surface-2);
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-table tr:hover {
+            background: var(--color-surface-2);
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--color-surface);
+            border-top: 1px solid var(--color-border);
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        .footer p {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a:hover {
+            color: var(--color-primary);
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--color-text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--color-surface);
+                flex-direction: column;
+                padding: 20px;
+                gap: 16px;
+                border-top: 1px solid var(--color-border);
+                box-shadow: var(--shadow-md);
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero-meta {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .header, .mobile-menu-btn {
+                display: none;
+            }
+            
+            .hero {
+                padding: 20px 0;
+            }
+            
+            .card, .step {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo">
+                <div class="logo-icon">🛡️</div>
+                <span>Security Advisory</span>
+            </a>
+            <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#affected">Who's Affected</a></li>
+                <li><a href="#guidance">Guidance</a></li>
+                <li><a href="#resources">Resources</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="status-badge">Under Investigation</div>
+            <h1>LiteLLM Supply Chain Security Review</h1>
+            <p class="hero-subtitle">
+                On March 24, 2026, two versions of the LiteLLM Python package were identified as containing unauthorized code. 
+                This advisory provides information about the incident, affected versions, and recommended actions for organizations.
+            </p>
+            <div class="hero-meta">
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Advisory Date</span>
+                    <span class="hero-meta-value">March 24, 2026</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Affected Package</span>
+                    <span class="hero-meta-value">litellm (PyPI)</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Severity</span>
+                    <span class="hero-meta-value">Critical</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span class="hero-meta-label">Status</span>
+                    <span class="hero-meta-value">Resolved on PyPI</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Diagnostic Tool Banner -->
+    <div class="quick-summary">
+        <div class="summary-card" style="margin-bottom: 20px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); color: white; border: none;">
+            <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+                <div style="font-size: 3rem;">🚀</div>
+                <div style="flex: 1;">
+                    <h3 style="color: white; margin-bottom: 8px; font-size: 1.3rem;">Quick Diagnostic Tool Available</h3>
+                    <p style="color: rgba(255,255,255,0.9); margin-bottom: 12px;">
+                        Download and run our Python script to automatically check all your Python environments, 
+                        virtual environments, package caches, and persistence artifacts in one go.
+                    </p>
+                    <p style="color: rgba(255,255,255,0.75); margin-bottom: 16px; font-size: 0.9rem;">
+                        🔍 <strong>Open source & read-only</strong> — Review the code before running. 
+                        <a href="litellm-security-check.py" style="color: white; text-decoration: underline;">View source</a>
+                    </p>
+                    <div class="code-block" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); margin: 0;">
+                        <code style="color: white;"><span style="color: rgba(255,255,255,0.6);"># Download and run the diagnostic tool</span>
+curl -O https://pedrorocha-net.github.io/litellm-security-advisory/litellm-security-check.py
+python litellm-security-check.py</code>
+                    </div>
+                </div>
+                <a href="litellm-security-check.py" download style="display: inline-flex; align-items: center; gap: 8px; background: white; color: #0ea5e9; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; white-space: nowrap;">
+                    📥 Download Script
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Summary -->
+    <div class="quick-summary">
+        <div class="summary-card">
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <h3>Affected Versions</h3>
+                    <div class="version-tags">
+                        <span class="tag tag-danger">1.82.7</span>
+                        <span class="tag tag-danger">1.82.8</span>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <h3>Safe Versions</h3>
+                    <div class="version-tags">
+                        <span class="tag tag-success">≤ 1.82.6</span>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <h3>Impact Summary</h3>
+                    <p style="color: var(--color-text-secondary); font-size: 0.95rem;">
+                        Unauthorized versions contained code that accessed system credentials and environment variables. 
+                        Organizations should review systems and rotate credentials as a precautionary measure.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main">
+        
+        <!-- Overview Section -->
+        <section class="section" id="overview">
+            <div class="section-header">
+                <span class="section-label">Incident Overview</span>
+                <h2 class="section-title">What Happened</h2>
+                <p class="section-intro">
+                    LiteLLM is an open-source library that provides a unified interface for accessing multiple AI/LLM providers. 
+                    On March 24, 2026, unauthorized versions were published to the Python Package Index (PyPI) containing code not present in the official source repository.
+                </p>
+            </div>
+
+            <div class="card-grid card-grid-2">
+                <div class="card">
+                    <h3>📋 The Entry Point</h3>
+                    <p>
+                        The incident appears to be linked to a previous security event involving the Trivy vulnerability scanner, 
+                        which is used in CI/CD pipelines. This resulted in exposed publishing credentials being used to upload 
+                        unauthorized package versions directly to PyPI.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>🔍 Discovery</h3>
+                    <p>
+                        The community identified the issue when version 1.82.8 was flagged for containing an unusual 
+                        <code style="background: var(--color-surface-2); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.9em;">.pth</code> 
+                        file. Security researchers and community members promptly reported the issue, leading to rapid response and removal of the affected versions.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>⚡ Response Time</h3>
+                    <p>
+                        The affected versions were available on PyPI for approximately 3 hours. PyPI has quarantined the package 
+                        and the LiteLLM team has rotated all credentials, engaged security experts (Mandiant), and is conducting 
+                        a comprehensive supply chain review.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>✅ Current Status</h3>
+                    <p>
+                        The malicious versions have been removed from PyPI. The LiteLLM team has confirmed that Docker images 
+                        were not affected (they use pinned dependencies). New releases are paused pending a full security review.
+                    </p>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>ℹ️</span>
+                    About LiteLLM
+                </div>
+                <p>
+                    LiteLLM serves as middleware between applications and AI service providers (OpenAI, Anthropic, Azure, etc.). 
+                    By design, it handles API keys for these services. This central role means organizations using LiteLLM should 
+                    review their API key exposure as part of their response.
+                </p>
+            </div>
+
+            <h3 style="margin: 32px 0 20px; font-size: 1.2rem;">Timeline</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">March 19, 2026</div>
+                    <h4>Trivy Security Event</h4>
+                    <p>A security incident involving the Trivy vulnerability scanner affects organizations using it in CI/CD pipelines.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">March 23, 2026</div>
+                    <h4>Checkmarx Investigation</h4>
+                    <p>Similar activity detected in Checkmarx tooling. Security community begins tracking related activity.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">March 24, 2026 — 10:39 UTC</div>
+                    <h4>Unauthorized Version 1.82.7</h4>
+                    <p>Package published to PyPI containing code not in the official GitHub repository.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">March 24, 2026 — 10:52 UTC</div>
+                    <h4>Unauthorized Version 1.82.8</h4>
+                    <p>Second version published with additional .pth file mechanism.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">March 24, 2026 — ~13:38 UTC</div>
+                    <h4>Community Discovery & Response</h4>
+                    <p>Issue reported, PyPI quarantines package, affected versions removed. LiteLLM team begins investigation.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Who's Affected -->
+        <section class="section" id="affected">
+            <div class="section-header">
+                <span class="section-label">Risk Assessment</span>
+                <h2 class="section-title">Who Should Review Their Systems</h2>
+                <p class="section-intro">
+                    Organizations using Python-based AI tooling should check whether they may have installed affected versions, 
+                    either directly or as a dependency of other tools.
+                </p>
+            </div>
+
+            <div class="card-grid card-grid-3">
+                <div class="card">
+                    <h3>🏢 Direct Users</h3>
+                    <p>
+                        Organizations that have installed or updated LiteLLM on March 24, 2026, particularly during the 
+                        10:39-13:38 UTC window, should review their environments.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>🔗 Framework Users</h3>
+                    <p>
+                        Teams using AI frameworks that depend on LiteLLM should verify their dependency versions. 
+                        Affected frameworks include DSPy, CrewAI, MLflow, and others.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>☁️ Cloud Deployments</h3>
+                    <p>
+                        Organizations with CI/CD pipelines or container images built during the exposure window 
+                        should verify their base images don't contain affected versions.
+                    </p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title">
+                    <span>⚠️</span>
+                    Understanding Transitive Dependencies
+                </div>
+                <p>
+                    Even if your organization never directly installed LiteLLM, it may have been installed automatically 
+                    as a dependency of another package. We recommend checking with your engineering teams about any 
+                    Python-based AI tooling used in your environment.
+                </p>
+            </div>
+
+            <h3 style="margin: 32px 0 20px; font-size: 1.2rem;">Potentially Affected Frameworks</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Framework</th>
+                        <th>Use Case</th>
+                        <th>Recommended Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>DSPy</td>
+                        <td>LLM programming framework</td>
+                        <td>Verify version pinning</td>
+                    </tr>
+                    <tr>
+                        <td>CrewAI</td>
+                        <td>AI agent orchestration</td>
+                        <td>Check dependency tree</td>
+                    </tr>
+                    <tr>
+                        <td>MLflow</td>
+                        <td>ML model serving</td>
+                        <td>Update to patched version</td>
+                    </tr>
+                    <tr>
+                        <td>Mem0</td>
+                        <td>Memory for AI agents</td>
+                        <td>Verify version pinning</td>
+                    </tr>
+                    <tr>
+                        <td>Instructor</td>
+                        <td>Structured LLM outputs</td>
+                        <td>Check dependency tree</td>
+                    </tr>
+                    <tr>
+                        <td>Guardrails AI</td>
+                        <td>LLM output validation</td>
+                        <td>Update to patched version</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Technical Details -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-label">Technical Information</span>
+                <h2 class="section-title">What the Unauthorized Code Did</h2>
+                <p class="section-intro">
+                    Understanding the technical details helps organizations prioritize their response activities appropriately.
+                </p>
+            </div>
+
+            <div class="card-grid card-grid-2">
+                <div class="card">
+                    <h3>📁 Version 1.82.7</h3>
+                    <p>
+                        Contained code embedded in <code style="background: var(--color-surface-2); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.9em;">proxy_server.py</code> 
+                        that executed when the LiteLLM proxy module was imported. This version required explicit import to activate.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>📁 Version 1.82.8</h3>
+                    <p>
+                        Added a <code style="background: var(--color-surface-2); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.9em;">.pth</code> file, 
+                        which Python processes automatically on interpreter startup. This meant the code could execute without 
+                        explicitly importing LiteLLM.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h3>🔑 Accessed Credentials and Data</h3>
+                <p style="margin-bottom: 20px;">
+                    The unauthorized code was designed to access various credential stores and sensitive files. 
+                    Organizations should review these categories in their environment:
+                </p>
+                <div class="card-grid card-grid-3" style="gap: 12px;">
+                    <div style="padding: 16px; background: var(--color-surface-2); border-radius: var(--radius);">
+                        <strong style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Cloud Providers</strong>
+                        <span style="color: var(--color-text-secondary); font-size: 0.9rem;">AWS, GCP, Azure credentials and config files</span>
+                    </div>
+                    <div style="padding: 16px; background: var(--color-surface-2); border-radius: var(--radius);">
+                        <strong style="display: block; margin-bottom: 8px; font-size: 0.9rem;">SSH Keys</strong>
+                        <span style="color: var(--color-text-secondary); font-size: 0.9rem;">Private keys in ~/.ssh/</span>
+                    </div>
+                    <div style="padding: 16px; background: var(--color-surface-2); border-radius: var(--radius);">
+                        <strong style="display: block; margin-bottom: 8px; font-size: 0.9rem;">AI API Keys</strong>
+                        <span style="color: var(--color-text-secondary); font-size: 0.9rem;">OpenAI, Anthropic, and other providers</span>
+                    </div>
+                    <div style="padding: 16px; background: var(--color-surface-2); border-radius: var(--radius);">
+                        <strong style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Environment Variables</strong>
+                        <span style="color: var(--color-text-secondary); font-size: 0.9rem;">All env vars and .env files</span>
+                    </div>
+                    <div style="padding: 16px; background: var(--color-surface-2); border-radius: var(--radius);">
+                        <strong style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Kubernetes</strong>
+                        <span style="color: var(--color-text-secondary); font-size: 0.9rem;">Service account tokens and secrets</span>
+                    </div>
+                    <div style="padding: 16px; background: var(--color-surface-2); border-radius: var(--radius);">
+                        <strong style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Databases</strong>
+                        <span style="color: var(--color-text-secondary); font-size: 0.9rem;">Connection strings and passwords</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>ℹ️</span>
+                    Exfiltration Destination
+                </div>
+                <p>
+                    Data was transmitted to <code style="background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 4px;">models.litellm.cloud</code> — 
+                    this is not an official LiteLLM domain. Organizations may wish to check their network logs for connections 
+                    to this domain during the exposure period.
+                </p>
+            </div>
+        </section>
+
+        <!-- Guidance Section -->
+        <section class="section" id="guidance">
+            <div class="section-header">
+                <span class="section-label">Recommended Actions</span>
+                <h2 class="section-title">Response Guidance</h2>
+                <p class="section-intro">
+                    Based on whether your organization was affected, here are the recommended steps to assess and secure your environment.
+                </p>
+            </div>
+
+            <div class="steps">
+                <div class="step expanded" onclick="toggleStep(this)">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <div class="step-title">
+                            <h3>Identify if Affected Versions Were Installed</h3>
+                            <p>Check your Python environments for versions 1.82.7 or 1.82.8</p>
+                        </div>
+                        <span class="step-toggle">▼</span>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-inner">
+                            <p style="margin-bottom: 16px;"><strong>For engineering teams:</strong></p>
+                            <div class="code-block">
+                                <code><span class="code-comment"># Check installed LiteLLM version</span>
+<span class="code-command">pip show litellm | grep Version</span>
+
+<span class="code-comment"># Check for .pth files (version 1.82.8)</span>
+<span class="code-command">find ~ -name "litellm_init.pth" 2>/dev/null</span>
+
+<span class="code-comment"># Search all virtual environments</span>
+<span class="code-command">find ~ -name "site-packages" -exec pip list --path {} \; 2>/dev/null | grep -i litellm</span></code>
+                            </div>
+                            
+                            <p style="margin: 20px 0 16px;"><strong>For non-technical stakeholders:</strong></p>
+                            <ul class="checklist">
+                                <li>Ask your engineering team if LiteLLM or AI frameworks (DSPy, CrewAI, MLflow) are used</li>
+                                <li>Check if any Python deployments were updated on March 24, 2026</li>
+                                <li>Contact vendors of AI-powered tools you use and ask about their LiteLLM usage</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step" onclick="toggleStep(this)">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <div class="step-title">
+                            <h3>Check Multiple Projects and Environments</h3>
+                            <p>Scan your entire machine for all Python projects, virtual environments, and package caches</p>
+                        </div>
+                        <span class="step-toggle">▼</span>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-inner">
+                            <div class="info-box" style="margin-bottom: 20px;">
+                                <div class="info-box-title">
+                                    <span>🚀</span>
+                                    Automated Option Available
+                                </div>
+                                <p>
+                                    You can use our <a href="litellm-security-check.py" download style="color: #0369a1; text-decoration: underline;">diagnostic Python script</a> 
+                                    to automatically scan all environments. Download and run: 
+                                    <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px;">python litellm-security-check.py</code>
+                                </p>
+                            </div>
+                            
+                            <p style="margin-bottom: 16px;">
+                                If you prefer to check manually, here are commands to scan all your Python environments:
+                            </p>
+                            
+                            <p style="margin-bottom: 12px;"><strong>Scan all virtual environments:</strong></p>
+                            <div class="code-block">
+                                <code><span class="code-comment"># Find and check all pip-installed packages across the system</span>
+<span class="code-command">find ~ -type f -name "METADATA" 2>/dev/null | xargs grep -l "^Name: litellm$" 2>/dev/null</span>
+
+<span class="code-comment"># Check all site-packages directories for litellm</span>
+<span class="code-command">find ~ -type d -name "site-packages" 2>/dev/null | while read dir; do
+  if [ -d "$dir/litellm" ]; then
+    echo "Found in: $dir"
+    cat "$dir/litellm-*.dist-info/METADATA" 2>/dev/null | grep "^Version:"
+  fi
+done</span></code>
+                            </div>
+
+                            <p style="margin: 20px 0 12px;"><strong>Check common virtual environment locations:</strong></p>
+                            <div class="code-block">
+                                <code><span class="code-comment"># Common venv/virtualenv locations</span>
+<span class="code-command">find ~ -type f -path "*/bin/python" 2>/dev/null | while read py; do
+  echo "Checking: $py"
+  "$py" -m pip show litellm 2>/dev/null | grep "Version:"
+done</span>
+
+<span class="code-comment"># Check Conda environments</span>
+<span class="code-command">conda env list | grep -v "^#" | awk '{print $1}' | while read env; do
+  if [ "$env" != "base" ]; then
+    echo "Conda env: $env"
+    conda run -n "$env" pip show litellm 2>/dev/null | grep "Version:"
+  fi
+done</span>
+
+<span class="code-comment"># Check Poetry virtual environments</span>
+<span class="code-command">find ~ -type d -name ".venv" -o -name "venv" -o -name ".env" 2>/dev/null | while read venv; do
+  echo "Poetry/Pipenv venv: $venv"
+  "$venv/bin/pip" show litellm 2>/dev/null | grep "Version:"
+done</span></code>
+                            </div>
+
+                            <p style="margin: 20px 0 12px;"><strong>Check package caches:</strong></p>
+                            <div class="code-block">
+                                <code><span class="code-comment"># Pip cache (may contain downloaded malicious versions)</span>
+<span class="code-command">pip cache list | grep litellm</span>
+<span class="code-command">ls -la ~/Library/Caches/pip/wheels/*/litellm* 2>/dev/null  # macOS</span>
+<span class="code-command">ls -la ~/.cache/pip/wheels/*/litellm* 2>/dev/null        # Linux</span>
+
+<span class="code-comment"># UV cache</span>
+<span class="code-command">ls -la ~/.cache/uv/wheels-v3/*/litellm* 2>/dev/null</span>
+
+<span class="code-comment"># Poetry cache</span>
+<span class="code-command">ls -la ~/Library/Caches/pypoetry/artifacts/*/litellm* 2>/dev/null  # macOS</span>
+<span class="code-command">ls -la ~/.cache/pypoetry/artifacts/*/litellm* 2>/dev/null          # Linux</span></code>
+                            </div>
+
+                            <p style="margin: 20px 0 12px;"><strong>One-liner to check everything:</strong></p>
+                            <div class="code-block">
+                                <code><span class="code-comment"># Quick comprehensive check script</span>
+<span class="code-command">echo "=== Checking all Python environments for LiteLLM ===" && \
+find ~ -type d -name "site-packages" 2>/dev/null | while read dir; do
+  if [ -f "$dir/litellm/__init__.py" ]; then
+    version=$(cat "$dir"/litellm-*.dist-info/METADATA 2>/dev/null | grep "^Version:" | head -1)
+    echo "[$dir] $version"
+  fi
+done && \
+echo "" && \
+echo "=== Checking for malicious .pth files ===" && \
+find ~ -name "litellm_init.pth" 2>/dev/null && \
+echo "" && \
+echo "=== Checking pip cache ===" && \
+pip cache list 2>/dev/null | grep litellm || echo "No pip cache or litellm not found"</span></code>
+                            </div>
+
+                            <div class="info-box" style="margin-top: 20px;">
+                                <div class="info-box-title">
+                                    <span>💡</span>
+                                    IDE Virtual Environments
+                                </div>
+                                <p>
+                                    Don't forget IDE-specific Python environments like VS Code's Python extension, 
+                                    PyCharm's virtualenvs, or Jupyter kernel environments. Check locations like:
+                                    <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px;">~/.vscode/</code>, 
+                                    <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px;">~/Library/Application Support/Jupyter/</code>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step" onclick="toggleStep(this)">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <div class="step-title">
+                            <h3>Check for Persistence Mechanisms</h3>
+                            <p>The unauthorized code may have established persistence on affected systems</p>
+                        </div>
+                        <span class="step-toggle">▼</span>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-inner">
+                            <div class="code-block">
+                                <code><span class="code-comment"># Check for systemd services</span>
+<span class="code-command">systemctl list-units | grep -i sysmon</span>
+<span class="code-command">ls -la /etc/systemd/system/sysmon.service 2>/dev/null</span>
+
+<span class="code-comment"># Check for persistence files</span>
+<span class="code-command">ls -la ~/.config/sysmon/ 2>/dev/null</span>
+<span class="code-command">ls -la /tmp/pglog /tmp/.pg_state 2>/dev/null</span>
+
+<span class="code-comment"># Kubernetes: check for unauthorized pods</span>
+<span class="code-command">kubectl get pods --all-namespaces | grep node-setup-</span></code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step" onclick="toggleStep(this)">
+                    <div class="step-header">
+                        <div class="step-number">4</div>
+                        <div class="step-title">
+                            <h3>Rotate Potentially Exposed Credentials</h3>
+                            <p>If affected versions were present, rotate credentials as a precautionary measure</p>
+                        </div>
+                        <span class="step-toggle">▼</span>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-inner">
+                            <div class="action-box">
+                                <div class="action-box-title">
+                                    <span>🔄</span>
+                                    Recommended Credential Rotation
+                                </div>
+                                <p>
+                                    As a precaution, consider rotating credentials that may have been accessible from affected systems. 
+                                    Priority should be given to credentials with elevated privileges or access to sensitive data.
+                                </p>
+                            </div>
+                            
+                            <ul class="checklist">
+                                <li>SSH keys (generate new keys, remove old ones from servers and GitHub/GitLab)</li>
+                                <li>Cloud provider credentials (AWS access keys, GCP service accounts, Azure service principals)</li>
+                                <li>AI service API keys (OpenAI, Anthropic, etc.)</li>
+                                <li>Database passwords and connection strings</li>
+                                <li>CI/CD pipeline secrets and deployment tokens</li>
+                                <li>Kubernetes service account tokens and cluster credentials</li>
+                                <li>Docker registry credentials</li>
+                            </ul>
+
+                            <div class="info-box" style="margin-top: 20px;">
+                                <div class="info-box-title">
+                                    <span>📊</span>
+                                    Review Access Logs
+                                </div>
+                                <p>
+                                    After rotating credentials, review cloud access logs (AWS CloudTrail, GCP Audit Logs, Azure Activity Logs) 
+                                    and Kubernetes audit logs for any unauthorized activity during and after the exposure window.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step" onclick="toggleStep(this)">
+                    <div class="step-header">
+                        <div class="step-number">5</div>
+                        <div class="step-title">
+                            <h3>Clean and Verify Affected Systems</h3>
+                            <p>Remove unauthorized artifacts and consider rebuilding from clean state</p>
+                        </div>
+                        <span class="step-toggle">▼</span>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-inner">
+                            <div class="code-block">
+                                <code><span class="code-comment"># Remove unauthorized package</span>
+<span class="code-command">pip uninstall litellm</span>
+
+<span class="code-comment"># Remove persistence artifacts if found</span>
+<span class="code-command">rm -rf ~/.config/sysmon/</span>
+<span class="code-command">rm -f /etc/systemd/system/sysmon.service</span>
+<span class="code-command">systemctl daemon-reload</span>
+
+<span class="code-comment"># Clear package caches</span>
+<span class="code-command">pip cache purge</span></code>
+                            </div>
+
+                            <div class="warning-box" style="margin-top: 20px;">
+                                <div class="warning-box-title">
+                                    <span>💡</span>
+                                    Consider Rebuilding
+                                </div>
+                                <p>
+                                    For systems confirmed to have run affected versions, the most reliable remediation is 
+                                    rebuilding from a known-clean state rather than attempting in-place cleanup. This ensures 
+                                    complete removal of any potential persistence mechanisms.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step" onclick="toggleStep(this)">
+                    <div class="step-header">
+                        <div class="step-number">6</div>
+                        <div class="step-title">
+                            <h3>Implement Supply Chain Protections</h3>
+                            <p>Reduce risk of similar incidents in the future</p>
+                        </div>
+                        <span class="step-toggle">▼</span>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-inner">
+                            <ul class="checklist">
+                                <li>Pin all dependencies to specific versions (avoid <code>package>=1.0</code>, use <code>package==1.0.0</code>)</li>
+                                <li>Use lock files (requirements.txt, poetry.lock, pnpm-lock.yaml) and commit them to version control</li>
+                                <li>Implement dependency scanning in CI/CD (Snyk, Dependabot, etc.)</li>
+                                <li>Consider internal package mirrors for critical dependencies</li>
+                                <li>Apply principle of least privilege to CI/CD systems</li>
+                                <li>Network segmentation between build systems and production</li>
+                                <li>Regular audit of dependency trees for high-risk packages</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources -->
+        <section class="section" id="resources">
+            <div class="section-header">
+                <span class="section-label">Additional Information</span>
+                <h2 class="section-title">Official Resources</h2>
+                <p class="section-intro">
+                    For the latest updates and detailed technical information, please refer to these authoritative sources.
+                </p>
+            </div>
+
+            <div class="resources-grid">
+                <a href="https://github.com/BerriAI/litellm/issues/24518" target="_blank" class="resource-link">
+                    <div class="resource-icon">📋</div>
+                    <div class="resource-info">
+                        <h4>Official LiteLLM Advisory</h4>
+                        <p>GitHub issue with official updates and investigation timeline</p>
+                    </div>
+                </a>
+                
+                <a href="https://docs.litellm.ai/blog/security-update-march-2026" target="_blank" class="resource-link">
+                    <div class="resource-icon">📝</div>
+                    <div class="resource-info">
+                        <h4>LiteLLM Security Blog</h4>
+                        <p>Official security update and recommendations</p>
+                    </div>
+                </a>
+                
+                <a href="https://snyk.io/articles/poisoned-security-scanner-backdooring-litellm/" target="_blank" class="resource-link">
+                    <div class="resource-icon">🔬</div>
+                    <div class="resource-info">
+                        <h4>Snyk Technical Analysis</h4>
+                        <p>Detailed technical breakdown of the attack chain</p>
+                    </div>
+                </a>
+                
+                <a href="https://www.helpnetsecurity.com/2026/03/25/teampcp-supply-chain-attacks/" target="_blank" class="resource-link">
+                    <div class="resource-icon">📰</div>
+                    <div class="resource-info">
+                        <h4>Help Net Security</h4>
+                        <p>Coverage of the broader security campaign context</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#overview">Overview</a>
+                <a href="#affected">Who's Affected</a>
+                <a href="#guidance">Guidance</a>
+                <a href="#resources">Resources</a>
+            </div>
+            <p>
+                <strong>Unofficial Community Resource</strong><br>
+                This website is not affiliated with, endorsed by, or connected to the LiteLLM project or BerriAI. 
+                It was created to help the community understand and respond to the security incident.
+            </p>
+            <p style="margin-top: 12px; font-size: 0.85rem;">
+                The diagnostic script is 100% open source. Please review it before running. 
+                No liability is assumed for any damages arising from use of this resource. 
+                Always refer to <a href="https://github.com/BerriAI/litellm/issues/24518" style="color: var(--color-primary);">official LiteLLM communications</a> for authoritative information.
+            </p>
+            <p style="margin-top: 16px;">
+                Last updated: March 25, 2026
+            </p>
+        </div>
+    </footer>
+
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "LiteLLM Security Advisory - March 2026",
+        "description": "Comprehensive security advisory for the LiteLLM supply chain incident on March 24, 2026. Learn if you're affected, what to do, and how to secure your systems.",
+        "url": "https://pedrorocha-net.github.io/litellm-security-advisory/",
+        "datePublished": "2026-03-25",
+        "dateModified": "2026-03-25",
+        "author": {
+            "@type": "Organization",
+            "name": "Security Advisory Community"
+        },
+        "about": {
+            "@type": "SecurityEvent",
+            "name": "LiteLLM Supply Chain Incident",
+            "description": "Unauthorized versions of LiteLLM Python package published to PyPI containing credential-harvesting code",
+            "startDate": "2026-03-24T10:39:00Z",
+            "endDate": "2026-03-24T13:38:00Z"
+        },
+        "mainEntity": {
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "What versions of LiteLLM are affected?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Versions 1.82.7 and 1.82.8 published to PyPI on March 24, 2026 are affected. Safe versions are 1.82.6 and earlier."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What should I do if I have an affected version installed?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Rotate all credentials that were accessible from the affected system (SSH keys, cloud credentials, API keys), check for persistence mechanisms, and consider rebuilding from a clean state."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "How do I check if I'm affected?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Run 'pip show litellm | grep Version' to check your installed version. If you have 1.82.7 or 1.82.8, or find litellm_init.pth files, you should take remediation steps."
+                    }
+                }
+            ]
+        }
+    }
+    </script>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+        
+        function toggleStep(element) {
+            element.classList.toggle('expanded');
+        }
+        
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navLinks').classList.remove('active');
+            });
+        });
+        
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
