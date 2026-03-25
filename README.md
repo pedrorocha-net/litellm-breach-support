@@ -2,7 +2,7 @@
 
 A one-page informational resource and diagnostic tool for the LiteLLM supply chain incident on March 24, 2026.
 
-🌐 **Live Site**: https://pedrorocha-net.github.io/litellm-security-advisory/
+🌐 **Live Site**: https://pedrorocha-net.github.io/litellm-breach-support/
 
 ---
 
@@ -21,7 +21,7 @@ The fastest way to check if you're affected is to run our diagnostic script:
 
 ```bash
 # Download the script
-curl -O https://pedrorocha-net.github.io/litellm-security-advisory/litellm-security-check.py
+curl -O https://pedrorocha-net.github.io/litellm-breach-support/litellm-security-check.py
 
 # Run it
 python litellm-security-check.py
@@ -84,7 +84,7 @@ To publish this site:
 4. Select the `main` branch and `/ (root)` folder
 5. Click **Save**
 
-Your site will be available at: `https://pedrorocha-net.github.io/litellm-security-advisory/`
+Your site will be available at: `https://pedrorocha-net.github.io/litellm-breach-support/`
 
 ---
 
@@ -132,7 +132,7 @@ The Python diagnostic script (`litellm-security-check.py`) is:
 **You can (and should) review the script before running it:**
 ```bash
 # Download and review
-curl -O https://pedrorocha-net.github.io/litellm-security-advisory/litellm-security-check.py
+curl -O https://pedrorocha-net.github.io/litellm-breach-support/litellm-security-check.py
 # Read the code
 cat litellm-security-check.py
 # Then run if you're comfortable
