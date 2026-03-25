@@ -862,10 +862,12 @@
                         🔍 <strong>Open source & read-only</strong> — Review the code before running. 
                         <a href="litellm-security-check.py" style="color: white; text-decoration: underline;">View source</a>
                     </p>
-                    <div class="code-block" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); margin: 0;">
-                        <code style="color: white;"><span style="color: rgba(255,255,255,0.6);"># Download and run the diagnostic tool</span>
-curl -O https://pedrorocha-net.github.io/litellm-breach-support/litellm-security-check.py
-python litellm-security-check.py</code>
+                    <div class="code-block" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); margin: 0; font-size: 0.85rem;">
+                        <code style="color: white;"><span style="color: rgba(255,255,255,0.6);"># macOS / Linux</span>
+curl -O https://pedrorocha-net.github.io/litellm-breach-support/litellm-security-check.py && python litellm-security-check.py
+
+<span style="color: rgba(255,255,255,0.6);"># Windows PowerShell</span>
+Invoke-WebRequest -Uri "https://pedrorocha-net.github.io/litellm-breach-support/litellm-security-check.py" -OutFile "litellm-security-check.py"; python litellm-security-check.py</code>
                     </div>
                 </div>
                 <a href="litellm-security-check.py" download style="display: inline-flex; align-items: center; gap: 8px; background: white; color: #0ea5e9; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; white-space: nowrap;">
@@ -1230,7 +1232,7 @@ python litellm-security-check.py</code>
                                 If you prefer to check manually, here are commands to scan all your Python environments:
                             </p>
                             
-                            <p style="margin-bottom: 12px;"><strong>Scan all virtual environments:</strong></p>
+                            <p style="margin-bottom: 12px;"><strong>macOS / Linux:</strong></p>
                             <div class="code-block">
                                 <code><span class="code-comment"># Find and check all pip-installed packages across the system</span>
 <span class="code-command">find ~ -type f -name "METADATA" 2>/dev/null | xargs grep -l "^Name: litellm$" 2>/dev/null</span>
@@ -1244,7 +1246,28 @@ python litellm-security-check.py</code>
 done</span></code>
                             </div>
 
-                            <p style="margin: 20px 0 12px;"><strong>Check common virtual environment locations:</strong></p>
+                            <p style="margin: 20px 0 12px;"><strong>Windows PowerShell:</strong></p>
+                            <div class="code-block">
+                                <code><span class="code-comment"># Find all site-packages directories</span>
+<span class="code-command">Get-ChildItem -Path $env:USERPROFILE -Recurse -Directory -Filter "site-packages" -ErrorAction SilentlyContinue | ForEach-Object {
+  $litellmDir = Join-Path $_.FullName "litellm"
+  if (Test-Path $litellmDir) {
+    Write-Host "Found in: $($_.FullName)"
+    $metadata = Get-ChildItem -Path $_.FullName -Filter "litellm-*.dist-info" | Select-Object -First 1
+    if ($metadata) {
+      Get-Content "$($metadata.FullName)\METADATA" | Select-String "^Version:"
+    }
+  }
+}</span>
+
+<span class="code-comment"># Check all Python installations</span>
+<span class="code-command">Get-Command python -All | ForEach-Object {
+  Write-Host "Checking: $($_.Source)"
+  & $_.Source -m pip show litellm 2>$null | Select-String "Version:"
+}</span></code>
+                            </div>
+
+                            <p style="margin: 20px 0 12px;"><strong>Check common virtual environment locations (macOS / Linux):</strong></p>
                             <div class="code-block">
                                 <code><span class="code-comment"># Common venv/virtualenv locations</span>
 <span class="code-command">find ~ -type f -path "*/bin/python" 2>/dev/null | while read py; do
@@ -1271,15 +1294,17 @@ done</span></code>
                             <div class="code-block">
                                 <code><span class="code-comment"># Pip cache (may contain downloaded malicious versions)</span>
 <span class="code-command">pip cache list | grep litellm</span>
-<span class="code-command">ls -la ~/Library/Caches/pip/wheels/*/litellm* 2>/dev/null  # macOS</span>
-<span class="code-command">ls -la ~/.cache/pip/wheels/*/litellm* 2>/dev/null        # Linux</span>
+<span class="code-command">ls -la ~/Library/Caches/pip/wheels/*/litellm* 2>/dev/null   # macOS</span>
+<span class="code-command">ls -la ~/.cache/pip/wheels/*/litellm* 2>/dev/null           # Linux</span>
+<span class="code-command">dir %LOCALAPPDATA%\pip\Cache\wheels\*\litellm* 2>nul         # Windows</span>
 
 <span class="code-comment"># UV cache</span>
 <span class="code-command">ls -la ~/.cache/uv/wheels-v3/*/litellm* 2>/dev/null</span>
 
 <span class="code-comment"># Poetry cache</span>
-<span class="code-command">ls -la ~/Library/Caches/pypoetry/artifacts/*/litellm* 2>/dev/null  # macOS</span>
-<span class="code-command">ls -la ~/.cache/pypoetry/artifacts/*/litellm* 2>/dev/null          # Linux</span></code>
+<span class="code-command">ls -la ~/Library/Caches/pypoetry/artifacts/*/litellm* 2>/dev/null   # macOS</span>
+<span class="code-command">ls -la ~/.cache/pypoetry/artifacts/*/litellm* 2>/dev/null           # Linux</span>
+<span class="code-command">dir %APPDATA%\pypoetry\artifacts\*\litellm* 2>nul                   # Windows</span></code>
                             </div>
 
                             <p style="margin: 20px 0 12px;"><strong>One-liner to check everything:</strong></p>
@@ -1327,6 +1352,7 @@ pip cache list 2>/dev/null | grep litellm || echo "No pip cache or litellm not f
                     </div>
                     <div class="step-content">
                         <div class="step-inner">
+                            <p style="margin-bottom: 12px;"><strong>macOS / Linux:</strong></p>
                             <div class="code-block">
                                 <code><span class="code-comment"># Check for systemd services</span>
 <span class="code-command">systemctl list-units | grep -i sysmon</span>
@@ -1338,6 +1364,19 @@ pip cache list 2>/dev/null | grep litellm || echo "No pip cache or litellm not f
 
 <span class="code-comment"># Kubernetes: check for unauthorized pods</span>
 <span class="code-command">kubectl get pods --all-namespaces | grep node-setup-</span></code>
+                            </div>
+                            
+                            <p style="margin: 20px 0 12px;"><strong>Windows:</strong></p>
+                            <div class="code-block">
+                                <code><span class="code-comment"># Check for suspicious scheduled tasks</span>
+<span class="code-command">schtasks /query /fo list | findstr /i sysmon</span>
+
+<span class="code-comment"># Check startup folder</span>
+<span class="code-command">dir "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\" | findstr /i sysmon</span>
+
+<span class="code-comment"># Check for persistence files</span>
+<span class="code-command">dir "%LOCALAPPDATA%\sysmon\" 2>nul</span>
+<span class="code-command">dir "%TEMP%\pglog" 2>nul</span></code>
                             </div>
                         </div>
                     </div>

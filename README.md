@@ -17,7 +17,9 @@ On March 24, 2026, LiteLLM versions 1.82.7 and 1.82.8 were compromised in a supp
 
 ## Quick Start: Diagnostic Tool
 
-The fastest way to check if you're affected is to run our diagnostic script:
+The fastest way to check if you're affected is to run our diagnostic script.
+
+### macOS / Linux
 
 ```bash
 # Download the script
@@ -27,7 +29,26 @@ curl -O https://pedrorocha-net.github.io/litellm-breach-support/litellm-security
 python litellm-security-check.py
 ```
 
-### What the Script Checks
+### Windows (PowerShell)
+
+```powershell
+# Download the script
+Invoke-WebRequest -Uri "https://pedrorocha-net.github.io/litellm-breach-support/litellm-security-check.py" -OutFile "litellm-security-check.py"
+
+# Run it
+python litellm-security-check.py
+```
+
+### Windows (Command Prompt with curl)
+
+```cmd
+curl -O https://pedrorocha-net.github.io/litellm-breach-support/litellm-security-check.py
+python litellm-security-check.py
+```
+
+---
+
+## What the Script Checks
 
 - ✅ All Python installations and virtual environments
 - ✅ Site-packages directories across your system
@@ -36,7 +57,9 @@ python litellm-security-check.py
 - ✅ Persistence artifacts (systemd services, suspicious files)
 - ✅ Kubernetes pods (optional)
 
-### Script Options
+---
+
+## Script Options
 
 ```bash
 # Output results as JSON
@@ -64,12 +87,34 @@ python litellm-security-check.py --no-color
 
 If you prefer to check manually:
 
+### macOS / Linux
+
 ```bash
 # Check current environment
 pip show litellm | grep Version
 
 # Check for malicious .pth files
 find ~ -name "litellm_init.pth" 2>/dev/null
+```
+
+### Windows (PowerShell)
+
+```powershell
+# Check current environment
+pip show litellm | findstr Version
+
+# Check for malicious .pth files
+Get-ChildItem -Path $env:USERPROFILE -Recurse -Filter "litellm_init.pth" -ErrorAction SilentlyContinue
+```
+
+### Windows (Command Prompt)
+
+```cmd
+# Check current environment
+pip show litellm | findstr Version
+
+# Check for malicious .pth files (requires findstr with recursion workaround)
+dir /s /b %USERPROFILE%\litellm_init.pth 2>nul
 ```
 
 ---
